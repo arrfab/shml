@@ -108,7 +108,7 @@ function attribute {
     end|off|reset) __attr=$__end;;
     bold)          __attr='\033[1m';;
     dim)           __attr='\033[2m';;
-    italic)        __attr='\033[4m';;
+    underline)     __attr='\033[4m';;
     blink)         __attr='\033[5m';;
     invert)        __attr='\033[7m';;
     hidden)        __attr='\033[8m';;
