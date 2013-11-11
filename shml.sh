@@ -188,7 +188,7 @@ function icon {
     copyright)             i='\xC2\xA9';;
     apple)                 i='\xEF\xA3\xBF';;
     skull|bones)           i='\xE2\x98\xA0';;
-    ':-)'|':)'|smile|face) i='\xE2\x98\xBA';;
+    ':-)'|':)'|'=)'|smile|face) i='\xE2\x98\xBA';;
   esac
   echo -ne "$i";
 }
