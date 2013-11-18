@@ -12,7 +12,6 @@
 #      Kiyor Cia, Jeff Foard FLOZz' MISC,
 #           Mark Otto & Dave Gandy
 #
-#
 #          https://github.com/odb/shml
 #************************************************#
 
@@ -88,7 +87,7 @@ function bg {
 function color-bar {
   if test "$2"; then
     for i in "$@"; do
-      echo -en "`background "$i" " "`"
+      echo -en "$(background "$i" " ")"
     done; echo
   else
     for i in {16..21}{21..16}; do
@@ -109,7 +108,7 @@ function attribute {
     end|off|reset) __attr=$__end;;
     bold)          __attr='\033[1m';;
     dim)           __attr='\033[2m';;
-    italic)        __attr='\033[4m';;
+    underline)     __attr='\033[4m';;
     blink)         __attr='\033[5m';;
     invert)        __attr='\033[7m';;
     hidden)        __attr='\033[8m';;
@@ -126,11 +125,11 @@ function a {
 
 ## Elements
 function br {
-  echo '\n'
+  echo -e "\n\r"
 }
 
 function tab {
-  echo '\t'
+  echo -e "\t"
 }
 
 function indent {
@@ -170,27 +169,85 @@ function hr {
 }
 
 # Icons
-#
-# TODO: Replace with codes.
 ##
+declare -A entities=()
+entities[quot]='\u0022'
+entities[amp]='\u0026'
+entities[lt]='\u003C'
+entities[gt]='\u003E'
+entities[nbsp]=' '
+entities[pi]='\u03C0'
+entities[ndash]='\u2013'
+entities[mdash]='\u2014'
+entities[lsquo]='\u2018'
+entities[rsquo]='\u2019'
+entities[sbquo]='\u201A'
+entities[ldquo]='\u201C'
+entities[rdquo]='\u201D'
+entities[dagger]='\u2020'
+entities[bullet]='\u2022'
+entities[lsaquo]='\u2039'
+entities[rasquo]='\u203A'
+entities[oline]='\u203E'
+entities[frasl]='\u2044'
+entities[euro]='\u20AC'
+entities[larr]='\u2190'
+entities[uarr]='\u2191'
+entities[rarr]='\u2192'
+entities[darr]='\u2193'
+entities[harr]='\u2194'
+entities[cararr]='\u21B5'
+entities[lArr]='\u21D0'
+entities[uArr]='\u21D1'
+entities[rArr]='\u21D2'
+entities[dArr]='\u21D3'
+entities[hArr]='\u21D4'
+entities[empty]='\u2205'
+entities[sum]='\u2211'
+entities[minus]='\u2212'
+entities[spades]='\u2660'
+entities[clubs]='\u2663'
+entities[hearts]='\u2665'
+entities[diams]='\u2666'
+function _entity_list {
+  local w=0
+  for i in "${!entities[@]}"; do
+    if [ $w -lt 3 ]; then
+      printf "  %07s:  %s   " "$i" "$( echo -e "${entities[$i]}")"
+      w="$(expr $w + 1)"
+    else
+      printf "  %07s:  %s   \n" "$i" "$( echo -e "${entities[$i]}")"
+      w=0
+    fi
+  done
+  echo " "
+}
+function entity {
+  echo -ne "${entities[$1]}"
+}
 function icon {
+  local i='';
   case "$1" in
-    check|checkmark)       echo -n '✓';;
-    X|x|xmark)             echo -n '✘';;
-    '<3'|heart)            echo -n '❤';;
-    sun)                   echo -n '☀';;
-    '*'|star)              echo -n '★';;
-    darkstar)              echo -n '☆';;
-    umbrella)              echo -n '☂';;
-    flag)                  echo -n '⚑';;
-    snow|snowflake)        echo -n '❄';;
-    music)                 echo -n '♫';;
-    scissors)              echo -n '✂';;
-    tm|trademark)          echo -n '™';;
-    copyright)             echo -n '©';;
-    apple)                 echo -n '';;
-    ':-)'|':)'|smile|face) echo -n '☺';;
+    check|checkmark)       i='\xE2\x9C\x93';;
+    X|x|xmark)             i='\xE2\x9C\x98';;
+    '<3'|heart)            i='\xE2\x9D\xA4';;
+    sun)                   i='\xE2\x98\x80';;
+    '*'|star)              i='\xE2\x98\x85';;
+    darkstar)              i='\xE2\x98\x86';;
+    umbrella)              i='\xE2\x98\x82';;
+    flag)                  i='\xE2\x9A\x91';;
+    snow|snowflake)        i='\xE2\x9D\x84';;
+    music)                 i='\xE2\x99\xAB';;
+    scissors)              i='\xE2\x9C\x82';;
+    tm|trademark)          i='\xE2\x84\xA2';;
+    copyright)             i='\xC2\xA9';;
+    apple)                 i='\xEF\xA3\xBF';;
+    skull|bones)           i='\xE2\x98\xA0';;
+    ':-)'|':)'|smile|face) i='\xE2\x98\xBA';;
+    *)
+      entity $1; return 0;;
   esac
+  echo -ne "$i";
 }
 
 #SHML:END
@@ -198,9 +255,10 @@ function icon {
 
 # Usage / Examples
 ##
-if [[ "`basename $0`" = "shml.sh" ]]; then
+if [[ "$(basename -- "$0")" = "shml.sh" ]]; then
 I=2
 echo -e "
+
 $(a bold 'SHML Usage / Help')
 $(hr '=')
 
@@ -231,7 +289,7 @@ $(i $I)>>foo bar<<
 $(i $I)>>bah boo<<
 $(i $I)$(color end)
 
-$(i $I)Short Hand: $(a italic 'c')
+$(i $I)Short Hand: $(a underline 'c')
 
 $(i $I)\$(c red 'foo')
 
@@ -264,7 +322,7 @@ $(i $I)>>foo bar<<
 $(i $I)>>bah boo<<
 $(background end)
 
-$(i $I)Short Hand: $(a italic 'bg')
+$(i $I)Short Hand: $(a underline 'bg')
 
 $(i $I)\$(bg red 'foo')
 
@@ -282,18 +340,23 @@ $(i $I)Default (no arg): end
 $(a bold 'Section 3: Attributes')
 $(hr '-')
 
-$(i $I)$(a bold '!! EXPERMENTAL !!')
-$(i $I)$(a italic "AKA It doesn't work for me, but should.")
+$(i $I)$(a bold "Attributes only work on vt100 compatable terminals.")
 
 $(i $I)> Note:
-$(i $I)> $(a italic 'attribute end') turns off everything,
+$(i $I)> $(a underline 'attribute end') turns off everything,
 $(i $I)> including foreground and background color.
 
 $(i $I)\$(attribute bold \"foo bar\")
 $(i $I)$(attribute bold "foo bar")
 
-$(i $I)\$(attribute italic \"foo bar\")
-$(i $I)$(attribute italic "foo bar")
+$(i $I)\$(attribute underline \"foo bar\")
+$(i $I)$(attribute underline "foo bar")
+
+$(i $I)\$(attribute blink \"foo bar\")
+$(i $I)$(attribute blink "foo bar")
+
+$(i $I)\$(attribute invert \"foo bar\")
+$(i $I)$(attribute invert "foo bar")
 
 $(i $I)\$(attribute dim)
 $(i $I)$(i $I)>>foo bar<<
@@ -304,13 +367,13 @@ $(i $I)$(i $I)>>foo bar<<
 $(i $I)$(i $I)>>bah boo<<
 $(i $I)$(attribute end)
 
-$(i $I)Short Hand: $(a italic 'a')
+$(i $I)Short Hand: $(a underline 'a')
 
 $(i $I)\$(a bold 'foo')
 
 $(i $I)Argument list:
 
-$(i $I)bold, dim, italic, blink, invert, hidden
+$(i $I)bold, dim, underline, blink, invert, hidden
 
 $(i $I)Termination: end, off, reset
 
@@ -326,7 +389,7 @@ $(i $I)
 $(i $I)foo\$(br)\$(indent)bar\$(br)\$(indent 6)boo
 $(i $I)foo$(br)$(indent)bar$(br)$(indent 6)boo
 $(i $I)
-$(i $I)> Note: short hand for $(a italic 'indent') is $(a italic 'i')
+$(i $I)> Note: short hand for $(a underline 'indent') is $(a underline 'i')
 $(i $I)
 $(i $I)\$(hr)
 $(i $I)$(hr)
@@ -341,11 +404,41 @@ $(i $I)\$(hr '#' 30)
 $(i $I)$(hr '#' 30)
 
 
-$(a bold 'Section 5: Icons')
+$(a bold 'Section 5: Icons / Entities')
 $(hr '-')
 
+$(i $I)Icons
+$(i $I)$(hr '-' 10)
+
 $(i $I)\$(icon check) \$(icon '<3') \$(icon '*') \$(icon ':)')
-$(i $I)$(icon check) $(icon '<3') $(icon '*') $(icon ':)')
+
+$(i $I)$(icon check) $(icon '<3') $(icon '*') $(icon 'smile')
+
+$(i $I)Argument list:
+
+$(i $I)check|checkmark, X|x|xmark, <3|heart, sun, *|star,
+$(i $I)darkstar, umbrella, flag, snow|snowflake, music,
+$(i $I)scissors, tm|trademark, copyright, apple,
+$(i $I):-)|:)|smile|face
+
+$(i $I)Entities
+$(i $I)$(hr '-' 10)
+
+$(i $I)A limited implementation of browser HTML Entities.
+
+$(i $I)\$(entity spades) \$(entity clubs) \$(entity hearts) \$(entity diams)
+
+$(i $I)$(entity spades) $(entity clubs) $(entity hearts) $(entity diams)
+
+$(i $I)Entities can also be referenced via 'icon':
+
+$(i $I)\$(icon spades) \$(icon clubs) \$(icon hearts) \$(icon diams)
+
+$(i $I)$(icon spades) $(icon clubs) $(icon hearts) $(icon diams)
+
+$(i $I)Argument list:
+
+$(_entity_list)
 
 
 $(a bold 'Section 6: Mixed Examples')
@@ -365,13 +458,6 @@ $(i $I)$(hr "$(i 'darkstar')" 11)
 $(i $I)>>bah boo<<
 $(a end)$(c end)$(bg end)
 
-$(i $I)Argument list:
-
-$(i $I)check|checkmark, X|x|xmark, <3|heart, sun, *|star,
-$(i $I)darkstar, umbrella, flag, snow|snowflake, music,
-$(i $I)scissors, tm|trademark, copyright, apple,
-$(i $I):-)|:)|smile|face
-
 
 $(a bold 'Section 7: Color Bar')
 $(hr '-')
@@ -388,7 +474,7 @@ $(i $I)$(color-bar red green yellow blue magenta \
                   lightgreen lightyellow lightblue \
                   lightmagenta lightcyan)
 
-$(i $I)Short Hand: $(a italic 'bar')
+$(i $I)Short Hand: $(a underline 'bar')
 $(i $I)
 $(i $I)\$(bar red red red red)
 
